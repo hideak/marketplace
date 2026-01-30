@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Marketplace",
-  description: "Hideak's marketplace website",
+  description: "Site de marketplace do Hideak",
 };
 
 interface Props {
