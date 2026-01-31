@@ -80,18 +80,18 @@ export default function ItemCard(props: Readonly<Props>) {
 
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => onEdit(id)}
-            className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-md transition-colors"
-          >
-            <Pencil className="w-3.5 h-3.5 hidden sm:block" />
-            Editar
-          </button>
-          <button
             onClick={handleDelete}
             className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 rounded-md transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5 hidden sm:block" />
             Excluir
+          </button>
+          <button
+            onClick={() => onEdit(id)}
+            className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-md transition-colors"
+          >
+            <Pencil className="w-3.5 h-3.5 hidden sm:block" />
+            Editar
           </button>
         </div>
       </div>

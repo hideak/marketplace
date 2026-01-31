@@ -16,7 +16,7 @@ export default function Header(props: Readonly<Props>) {
           <div className="bg-blue-600 p-2 rounded-lg">
             <ShoppingCart className="w-5 h-5 text-white" />
           </div>
-          <h1 className="text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-600 to-indigo-600">
+          <h1 className="font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-600 to-indigo-600">
             Marketplace
           </h1>
         </div>
