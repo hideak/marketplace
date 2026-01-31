@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Item } from "../models/Item";
 import { ItemState } from "../models/ItemState";
-import { X } from "lucide-react";
+import { X, Camera, Image as ImageIcon } from "lucide-react";
 import { StateBadges } from "./ItemCard";
+import { compressImage } from "@/lib/imageUtils";
+import { itemService } from "@/lib/itemService";
 
 interface Props {
   isOpen: boolean;
@@ -12,13 +14,15 @@ interface Props {
 }
 
 export default function ItemForm({ isOpen, onClose, onSave, initialItem }: Readonly<Props>) {
-// ... existing state ...
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [state, setState] = useState<ItemState>(ItemState.ToSell);
+  const [imageFile, setImageFile] = useState<Blob | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (initialItem) {
@@ -27,27 +31,54 @@ export default function ItemForm({ isOpen, onClose, onSave, initialItem }: Reado
       setDescription(initialItem.description);
       setCategory(initialItem.category);
       setState(initialItem.state);
+      setImagePreview(initialItem.image_url || null);
     } else {
       setName("");
       setPrice("");
       setDescription("");
       setCategory("");
       setState(ItemState.ToSell);
+      setImagePreview(null);
     }
+    setImageFile(null);
   }, [initialItem, isOpen]);
 
   if (!isOpen) return null;
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const compressedBlob = await compressImage(file);
+        setImageFile(compressedBlob);
+        
+        // Create preview URL
+        const previewUrl = URL.createObjectURL(compressedBlob);
+        setImagePreview(previewUrl);
+      } catch (error) {
+        console.error("Error processing image:", error);
+        alert("Erro ao processar imagem.");
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      let imageUrl = initialItem?.image_url;
+
+      if (imageFile) {
+        imageUrl = await itemService.uploadImage(imageFile);
+      }
+
       await onSave({
         name,
         price: parseFloat(price),
         description,
         category,
         state,
+        image_url: imageUrl,
       });
       onClose();
     } catch (error) {
@@ -74,6 +105,41 @@ export default function ItemForm({ isOpen, onClose, onSave, initialItem }: Reado
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Image Upload Area */}
+          <div className="flex justify-center">
+             <div 
+              className="relative w-full h-48 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors overflow-hidden group"
+              onClick={() => fileInputRef.current?.click()}
+             >
+                {imagePreview ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Camera className="w-8 h-8 text-white" />
+                      <span className="text-white font-medium ml-2">Alterar Foto</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="bg-white p-3 rounded-full shadow-sm mb-2">
+                      <ImageIcon className="w-6 h-6 text-gray-400" />
+                    </div>
+                    <span className="text-sm text-gray-500 font-medium">Adicionar Foto</span>
+                    <span className="text-xs text-gray-400 mt-1">Clique ou tire uma foto</span>
+                  </>
+                )}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden" 
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  // capture="environment" // Optional: force rear camera on mobile
+                />
+             </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Nome do Item

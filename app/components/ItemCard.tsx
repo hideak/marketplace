@@ -6,6 +6,7 @@ interface Props {
   name: string;
   price: number;
   state: ItemState;
+  image_url?: string;
   isSelected: boolean;
   onToggleSelect: (id: number) => void;
   onEdit: (id: number) => void;
@@ -21,7 +22,7 @@ export const StateBadges: Record<ItemState, { label: string; className: string }
 };
 
 export default function ItemCard(props: Readonly<Props>) {
-  const { id, name, price, state, isSelected, onToggleSelect, onEdit, onDelete } = props;
+  const { id, name, price, state, image_url, isSelected, onToggleSelect, onEdit, onDelete } = props;
   const badge = StateBadges[state];
 
   const handleDelete = () => {
@@ -37,14 +38,19 @@ export default function ItemCard(props: Readonly<Props>) {
       }`}
     >
       <div className="absolute top-5 right-5 z-10">
-        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.className}`}>
+        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.className} shadow-xs`}>
           {badge.label}
         </span>
       </div>
 
       <div>
-        <div className="h-40 bg-gray-100 rounded-md mb-4 flex items-center justify-center overflow-hidden">
-          <ShoppingBag className="w-12 h-12 text-gray-400" />
+        <div className="h-40 bg-gray-100 rounded-md mb-4 flex items-center justify-center overflow-hidden relative">
+          {image_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={image_url} alt={name} className="w-full h-full object-cover" />
+          ) : (
+            <ShoppingBag className="w-12 h-12 text-gray-400" />
+          )}
         </div>
         <h3 className="font-semibold text-lg text-gray-900 mb-1">{name}</h3>
       </div>

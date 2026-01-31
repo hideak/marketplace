@@ -17,6 +17,24 @@ export const itemService = {
     })) as Item[];
   },
 
+  async uploadImage(file: Blob): Promise<string> {
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
+    const { error } = await supabase.storage
+      .from('item-images')
+      .upload(fileName, file, {
+        contentType: 'image/jpeg',
+        upsert: false
+      });
+
+    if (error) throw error;
+
+    const { data } = supabase.storage
+      .from('item-images')
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
+  },
+
   async createItem(item: Omit<Item, 'id' | 'created_at'>) {
     const { data, error } = await supabase
       .from('items')

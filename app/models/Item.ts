@@ -7,4 +7,5 @@ export interface Item {
   description: string;
   state: ItemState;
   category: string;
+  image_url?: string;
 }
