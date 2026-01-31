@@ -23,6 +23,7 @@ export default function ItemForm({ isOpen, onClose, onSave, initialItem }: Reado
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (initialItem) {
@@ -108,16 +109,29 @@ export default function ItemForm({ isOpen, onClose, onSave, initialItem }: Reado
           {/* Image Upload Area */}
           <div className="flex justify-center">
              <div 
-              className="relative w-full h-48 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors overflow-hidden group"
-              onClick={() => fileInputRef.current?.click()}
+              className="relative w-full h-48 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors overflow-hidden group"
              >
                 {imagePreview ? (
                   <>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Camera className="w-8 h-8 text-white" />
-                      <span className="text-white font-medium ml-2">Alterar Foto</span>
+                    <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-3">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-gray-900 font-medium hover:bg-gray-100 transition-colors"
+                      >
+                        <ImageIcon className="w-5 h-5" />
+                        Galeria
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => cameraInputRef.current?.click()}
+                        className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-gray-900 font-medium hover:bg-gray-100 transition-colors"
+                      >
+                        <Camera className="w-5 h-5" />
+                        Câmera
+                      </button>
                     </div>
                   </>
                 ) : (
@@ -125,8 +139,24 @@ export default function ItemForm({ isOpen, onClose, onSave, initialItem }: Reado
                     <div className="bg-white p-3 rounded-full shadow-sm mb-2">
                       <ImageIcon className="w-6 h-6 text-gray-400" />
                     </div>
-                    <span className="text-sm text-gray-500 font-medium">Adicionar Foto</span>
-                    <span className="text-xs text-gray-400 mt-1">Clique ou tire uma foto</span>
+                    <span className="text-sm text-gray-500 font-medium mb-3">Adicionar Foto</span>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        Galeria
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => cameraInputRef.current?.click()}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <Camera className="w-4 h-4" />
+                        Câmera
+                      </button>
+                    </div>
                   </>
                 )}
                 <input 
@@ -135,7 +165,14 @@ export default function ItemForm({ isOpen, onClose, onSave, initialItem }: Reado
                   className="hidden" 
                   ref={fileInputRef}
                   onChange={handleImageChange}
-                  // capture="environment" // Optional: force rear camera on mobile
+                />
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden" 
+                  ref={cameraInputRef}
+                  onChange={handleImageChange}
                 />
              </div>
           </div>
