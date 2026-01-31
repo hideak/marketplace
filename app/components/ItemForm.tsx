@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Item } from "../models/Item";
 import { ItemState } from "../models/ItemState";
 import { X } from "lucide-react";
+import { StateBadges } from "./ItemCard";
 
 interface Props {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function ItemForm({ isOpen, onClose, onSave, initialItem }: Readonly<Props>) {
+// ... existing state ...
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
@@ -127,9 +129,9 @@ export default function ItemForm({ isOpen, onClose, onSave, initialItem }: Reado
               onChange={(e) => setState(e.target.value as ItemState)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
             >
-              {Object.values(ItemState).map((s) => (
-                <option key={s} value={s}>
-                  {s}
+              {Object.entries(StateBadges).map(([key, { label }]) => (
+                <option key={key} value={key}>
+                  {label}
                 </option>
               ))}
             </select>
