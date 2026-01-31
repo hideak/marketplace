@@ -25,13 +25,12 @@ export default function Home() {
 
     const selectedItems = itemMock.filter((item) => selectedProductIds.has(item.id));
     
-    let message = "Olá! Tenho interesse nos seguintes itens do seu marketplace:\n\n";
+    let message = "Olá! Tenho interesse nos seguintes itens do marketplace:\n\n";
     selectedItems.forEach((item) => {
-      message += `- [ID: ${item.id}] ${item.name}\n`;
+      message += `* R$ ${item.price.toFixed(2).replace(".", ",")} (ID: ${item.id}) ${item.name}\n`;
     });
     
     message += `\nTotal: R$ ${totalValue.toFixed(2).replace(".", ",")}`;
-    message += "\n\nPodemos combinar a entrega/pagamento?";
 
     const whatsappUrl = `https://wa.me/5519994115113?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
