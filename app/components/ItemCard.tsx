@@ -5,7 +5,6 @@ interface Props {
   id: number;
   name: string;
   price: number;
-  description: string;
   state: ItemState;
   isSelected: boolean;
   onToggleSelect: (id: number) => void;
@@ -20,7 +19,7 @@ const StateBadges: Record<ItemState, { label: string; className: string }> = {
 };
 
 export default function ItemCard(props: Readonly<Props>) {
-  const { id, name, price, description, state, isSelected, onToggleSelect } = props;
+  const { id, name, price, state, isSelected, onToggleSelect } = props;
   const badge = StateBadges[state];
 
   return (
@@ -40,7 +39,6 @@ export default function ItemCard(props: Readonly<Props>) {
           <ShoppingBag className="w-12 h-12 text-gray-400" />
         </div>
         <h3 className="font-semibold text-lg text-gray-900 mb-1">{name}</h3>
-        <p className="text-sm text-gray-500 mb-3">{description}</p>
       </div>
       
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-auto pt-4 border-t border-gray-100 gap-3 sm:gap-0">
