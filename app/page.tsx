@@ -3,41 +3,31 @@
 import { useState, useMemo, useEffect } from "react";
 import ItemCard from "./components/ItemCard";
 import Header from "./components/Header";
+import ItemForm from "./components/ItemForm";
 import { Item } from "./models/Item";
-import { supabase } from "@/lib/supabaseClient";
-import { ItemState } from "./models/ItemState";
+import { itemService } from "@/lib/itemService";
 
 export default function Home() {
   const [selectedProductIds, setSelectedProductIds] = useState<Set<number>>(new Set());
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // CRUD State
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<Item | undefined>(undefined);
+
+  const fetchItems = async () => {
+    try {
+      const data = await itemService.getItems();
+      setItems(data);
+    } catch (err) {
+      console.error('Error fetching items:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchItems() {
-      try {
-        const { data, error } = await supabase
-          .from('items')
-          .select('*');
-        
-        if (error) {
-          console.error('Error fetching items:', error);
-          return;
-        }
-
-        if (data) {
-          const formattedItems: Item[] = data.map((item) => ({
-            ...item,
-            state: item.state as ItemState,
-          }));
-          setItems(formattedItems);
-        }
-      } catch (err) {
-        console.error('Unexpected error:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
     fetchItems();
   }, []);
 
@@ -68,6 +58,54 @@ export default function Home() {
 
     const whatsappUrl = `https://wa.me/5519994115113?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
+  };
+
+  // CRUD Handlers
+  const handleAdd = () => {
+    setEditingItem(undefined);
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (id: number) => {
+    const itemToEdit = items.find((item) => item.id === id);
+    if (itemToEdit) {
+      setEditingItem(itemToEdit);
+      setIsFormOpen(true);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await itemService.deleteItem(id);
+      setItems((prev) => prev.filter((item) => item.id !== id));
+      
+      // Also remove from selection if it was selected
+      if (selectedProductIds.has(id)) {
+        setSelectedProductIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(id);
+          return newSet;
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      alert("Erro ao excluir item.");
+    }
+  };
+
+  const handleSave = async (itemData: Omit<Item, "id" | "created_at">) => {
+    try {
+      if (editingItem) {
+        const updatedItem = await itemService.updateItem(editingItem.id, itemData);
+        setItems((prev) => prev.map((item) => (item.id === editingItem.id ? updatedItem : item)));
+      } else {
+        const newItem = await itemService.createItem(itemData);
+        setItems((prev) => [newItem, ...prev]);
+      }
+    } catch (error) {
+      console.error("Error saving item:", error);
+      throw error; // Re-throw to be caught by the form
+    }
   };
 
   const totalValue = useMemo(() => {
@@ -101,6 +139,7 @@ export default function Home() {
       <Header 
         selectedCount={selectedProductIds.size} 
         onCheckout={handleCheckout} 
+        onAdd={handleAdd}
       />
 
       <main className="container mx-auto px-4 pt-4">
@@ -122,6 +161,8 @@ export default function Home() {
                     {...product}
                     isSelected={selectedProductIds.has(product.id)}
                     onToggleSelect={handleToggleSelect}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
                   />
                 ))}
               </div>
@@ -140,6 +181,13 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      <ItemForm 
+        isOpen={isFormOpen} 
+        onClose={() => setIsFormOpen(false)} 
+        onSave={handleSave} 
+        initialItem={editingItem} 
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Check, ShoppingBag } from "lucide-react";
+import { Check, ShoppingBag, Pencil, Trash2 } from "lucide-react";
 import { ItemState } from "../models/ItemState";
 
 interface Props {
@@ -8,6 +8,8 @@ interface Props {
   state: ItemState;
   isSelected: boolean;
   onToggleSelect: (id: number) => void;
+  onEdit: (id: number) => void;
+  onDelete: (id: number) => void;
 }
 
 const StateBadges: Record<ItemState, { label: string; className: string }> = {
@@ -19,8 +21,14 @@ const StateBadges: Record<ItemState, { label: string; className: string }> = {
 };
 
 export default function ItemCard(props: Readonly<Props>) {
-  const { id, name, price, state, isSelected, onToggleSelect } = props;
+  const { id, name, price, state, isSelected, onToggleSelect, onEdit, onDelete } = props;
   const badge = StateBadges[state];
+
+  const handleDelete = () => {
+    if (confirm("Tem certeza que deseja excluir este item?")) {
+      onDelete(id);
+    }
+  };
 
   return (
     <div
@@ -35,8 +43,25 @@ export default function ItemCard(props: Readonly<Props>) {
       </div>
 
       <div>
-        <div className="h-40 bg-gray-100 rounded-md mb-4 flex items-center justify-center">
+        <div className="h-40 bg-gray-100 rounded-md mb-4 flex items-center justify-center group relative overflow-hidden">
           <ShoppingBag className="w-12 h-12 text-gray-400" />
+          
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+             <button
+              onClick={() => onEdit(id)}
+              className="p-2 bg-white rounded-full text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+              title="Editar"
+            >
+              <Pencil className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleDelete}
+              className="p-2 bg-white rounded-full text-gray-700 hover:text-red-600 hover:bg-gray-50 transition-colors"
+              title="Excluir"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          </div>
         </div>
         <h3 className="font-semibold text-lg text-gray-900 mb-1">{name}</h3>
       </div>
