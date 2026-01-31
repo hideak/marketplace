@@ -1,12 +1,45 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import ItemCard from "./components/ItemCard";
 import Header from "./components/Header";
-import { itemMock } from "./mocks/items";
+import { Item } from "./models/Item";
+import { supabase } from "@/lib/supabaseClient";
+import { ItemState } from "./models/ItemState";
 
 export default function Home() {
   const [selectedProductIds, setSelectedProductIds] = useState<Set<number>>(new Set());
+  const [items, setItems] = useState<Item[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchItems() {
+      try {
+        const { data, error } = await supabase
+          .from('items')
+          .select('*');
+        
+        if (error) {
+          console.error('Error fetching items:', error);
+          return;
+        }
+
+        if (data) {
+          const formattedItems: Item[] = data.map((item) => ({
+            ...item,
+            state: item.state as ItemState,
+          }));
+          setItems(formattedItems);
+        }
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchItems();
+  }, []);
 
   const handleToggleSelect = (id: number) => {
     setSelectedProductIds((prev) => {
@@ -23,36 +56,45 @@ export default function Home() {
   const handleCheckout = () => {
     if (selectedProductIds.size === 0) return;
 
-    const selectedItems = itemMock.filter((item) => selectedProductIds.has(item.id));
+    const selectedItems = items.filter((item) => selectedProductIds.has(item.id));
     
-    let message = "Olá! Tenho interesse nos seguintes itens do marketplace:\n\n";
+    let message = "Olá! Tenho interesse nos seguintes itens do seu marketplace:\n\n";
     selectedItems.forEach((item) => {
-      message += `* R$ ${item.price.toFixed(2).replace(".", ",")} (ID: ${item.id}) ${item.name}\n`;
+      message += `- [ID: ${item.id}] ${item.name}\n`;
     });
     
     message += `\nTotal: R$ ${totalValue.toFixed(2).replace(".", ",")}`;
+    message += "\n\nPodemos combinar a entrega/pagamento?";
 
     const whatsappUrl = `https://wa.me/5519994115113?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
   };
 
   const totalValue = useMemo(() => {
-    return itemMock
+    return items
       .filter((item) => selectedProductIds.has(item.id))
       .reduce((sum, item) => sum + item.price, 0);
-  }, [selectedProductIds]);
+  }, [selectedProductIds, items]);
 
   // Group items by category
   const productsByCategory = useMemo(() => {
-    const groups: Record<string, typeof itemMock> = {};
-    itemMock.forEach((product) => {
+    const groups: Record<string, Item[]> = {};
+    items.forEach((product) => {
       if (!groups[product.category]) {
         groups[product.category] = [];
       }
       groups[product.category].push(product);
     });
     return groups;
-  }, []);
+  }, [items]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600">Carregando itens...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
