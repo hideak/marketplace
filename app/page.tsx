@@ -7,6 +7,8 @@ import ItemForm from "./components/ItemForm";
 import { Item } from "./models/Item";
 import { itemService } from "@/lib/itemService";
 
+import LoadingSpinner from "./components/LoadingSpinner";
+
 export default function Home() {
   const [selectedProductIds, setSelectedProductIds] = useState<Set<number>>(new Set());
   const [items, setItems] = useState<Item[]>([]);
@@ -129,7 +131,7 @@ export default function Home() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Carregando itens...</div>
+        <LoadingSpinner />
       </div>
     );
   }
@@ -151,9 +153,11 @@ export default function Home() {
         <div className="space-y-16">
           {Object.entries(productsByCategory).map(([category, products]) => (
             <section key={category}>
-              <h3 className="text-2xl font-semibold text-gray-800 mb-6 pl-2 border-l-4 border-blue-500">
-                {category}
-              </h3>
+              <div className="sticky top-14 bg-gray-50 z-30 py-4 mb-2">
+                <h3 className="text-2xl font-semibold text-gray-800 pl-2 border-l-4 border-blue-500">
+                  {category}
+                </h3>
+              </div>
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
                 {products.map((product) => (
                   <ItemCard

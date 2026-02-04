@@ -1,9 +1,12 @@
 import { Check, ShoppingBag, Pencil, Trash2 } from "lucide-react";
 import { ItemState } from "../models/ItemState";
+import { useState } from "react";
+import ImageModal from "./ImageModal";
 
 interface Props {
   id: number;
   name: string;
+  description: string;
   price: number;
   state: ItemState;
   image_url?: string;
@@ -22,8 +25,9 @@ export const StateBadges: Record<ItemState, { label: string; className: string }
 };
 
 export default function ItemCard(props: Readonly<Props>) {
-  const { id, name, price, state, image_url, isSelected, onToggleSelect, onEdit, onDelete } = props;
+  const { id, name, description, price, state, image_url, isSelected, onToggleSelect, onEdit, onDelete } = props;
   const badge = StateBadges[state];
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleDelete = () => {
     if (confirm("Tem certeza que deseja excluir este item?")) {
@@ -32,69 +36,82 @@ export default function ItemCard(props: Readonly<Props>) {
   };
 
   return (
-    <div
-      className={`relative border rounded-lg p-4 flex flex-col justify-between transition-all duration-200 shadow-sm hover:shadow-md ${
-        isSelected ? "border-blue-500 bg-blue-50/50" : "border-gray-200 bg-white"
-      }`}
-    >
-      <div className="absolute top-5 right-5 z-10">
-        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.className} shadow-xs`}>
-          {badge.label}
-        </span>
-      </div>
-
-      <div>
-        <div className="h-40 bg-gray-100 rounded-md mb-4 flex items-center justify-center overflow-hidden relative">
-          {image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={image_url} alt={name} className="w-full h-full object-cover" />
-          ) : (
-            <ShoppingBag className="w-12 h-12 text-gray-400" />
-          )}
+    <>
+      <div
+        className={`relative border rounded-lg p-1 flex flex-col justify-between transition-all duration-200 shadow-sm hover:shadow-md ${
+          isSelected ? "border-blue-500 bg-blue-50/50" : "border-gray-200 bg-white"
+        }`}
+      >
+        <div className="absolute top-2 right-2 z-10">
+          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.className} shadow-xs`}>
+            {badge.label}
+          </span>
         </div>
-        <h3 className="font-semibold text-lg text-gray-900 mb-1">{name}</h3>
-      </div>
-      
-      <div className="flex flex-col gap-3 mt-auto pt-4 border-t border-gray-100">
-        <span className="font-bold text-xl text-gray-900">
-          R$ {price.toFixed(2).replace(".", ",")}
-        </span>
+
+        <div>
+          <div 
+            className="h-40 bg-gray-100 rounded-md mb-2 flex items-center justify-center overflow-hidden relative cursor-pointer"
+            onClick={() => setIsModalOpen(true)}
+          >
+            {image_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={image_url} alt={name} className="w-full h-full object-cover transition-transform hover:scale-105" />
+            ) : (
+              <ShoppingBag className="w-12 h-12 text-gray-400" />
+            )}
+          </div>
+          <h3 className="mx-2 font-semibold text-gray-900">{name}</h3>
+          <h3 className="mx-2 mb-2 text-xs text-gray-600">{description}</h3>
+        </div>
         
-        <button
-          onClick={() => onToggleSelect(id)}
-          className={`w-full px-4 py-2 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-colors ${
-            isSelected
-              ? "bg-blue-600 text-white hover:bg-blue-700"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-        >
-          {isSelected ? (
-            <>
-              <Check className="w-4 h-4" />
-              Selecionado
-            </>
-          ) : (
-            "Selecionar Item"
-          )}
-        </button>
+        <div className="flex flex-col gap-1 pt-2 border-t border-gray-100">
+          <span className="mx-2 font-bold text-gray-900">
+            R$ {price.toFixed(2).replace(".", ",")}
+          </span>
+          
+          <button
+            onClick={() => onToggleSelect(id)}
+            className={`w-full px-4 py-2 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-colors ${
+              isSelected
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            {isSelected ? (
+              <>
+                <Check className="w-4 h-4" />
+                Selecionado
+              </>
+            ) : (
+              "Selecionar Item"
+            )}
+          </button>
 
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={handleDelete}
-            className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 rounded-md transition-colors"
-          >
-            <Trash2 className="w-3.5 h-3.5 hidden sm:block" />
-            Excluir
-          </button>
-          <button
-            onClick={() => onEdit(id)}
-            className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-md transition-colors"
-          >
-            <Pencil className="w-3.5 h-3.5 hidden sm:block" />
-            Editar
-          </button>
+          <div className="grid grid-cols-2 gap-1">
+            <button
+              onClick={handleDelete}
+              className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 rounded-md transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5 hidden sm:block" />
+              Excluir
+            </button>
+            <button
+              onClick={() => onEdit(id)}
+              className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-md transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5 hidden sm:block" />
+              Editar
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      <ImageModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        imageUrl={image_url} 
+        altText={name} 
+      />
+    </>
   );
 }
