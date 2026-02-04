@@ -49,26 +49,25 @@ export default function ItemCard(props: Readonly<Props>) {
         </div>
 
         <div>
-          <div 
-            className="h-40 bg-gray-100 rounded-md mb-2 flex items-center justify-center overflow-hidden relative cursor-pointer"
-            onClick={() => setIsModalOpen(true)}
-          >
-            {image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
+          {image_url && (
+            <div 
+              className="h-40 bg-gray-100 rounded-md mb-2 flex items-center justify-center overflow-hidden relative cursor-pointer"
+              onClick={() => setIsModalOpen(true)}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={image_url} alt={name} className="w-full h-full object-cover transition-transform hover:scale-105" />
-            ) : (
-              <ShoppingBag className="w-12 h-12 text-gray-400" />
-            )}
-          </div>
+            </div>
+          )}
           <h3 className="mx-2 font-semibold text-gray-900">{name}</h3>
           <h3 className="mx-2 mb-2 text-xs text-gray-600">{description}</h3>
         </div>
         
         <div className="flex flex-col gap-1 pt-2 border-t border-gray-100">
-          <span className="mx-2 font-bold text-gray-900">
-            R$ {price.toFixed(2).replace(".", ",")}
-          </span>
-          
+          {price > 0 && (
+            <span className="mx-2 font-bold text-gray-900">
+              R$ {price.toFixed(2).replace(".", ",")}
+            </span>
+          )}
           <button
             onClick={() => onToggleSelect(id)}
             className={`w-full px-4 py-2 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-colors ${

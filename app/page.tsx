@@ -116,16 +116,29 @@ export default function Home() {
       .reduce((sum, item) => sum + item.price, 0);
   }, [selectedProductIds, items]);
 
-  // Group items by category
+  // Group items by category and sort them
   const productsByCategory = useMemo(() => {
     const groups: Record<string, Item[]> = {};
+    
+    // Create groups
     items.forEach((product) => {
       if (!groups[product.category]) {
         groups[product.category] = [];
       }
       groups[product.category].push(product);
     });
-    return groups;
+
+    // Sort items within each group and sort the categories themselves
+    const sortedGroups: Record<string, Item[]> = {};
+    Object.keys(groups)
+      .sort((a, b) => a.localeCompare(b))
+      .forEach((category) => {
+        sortedGroups[category] = groups[category].sort((a, b) => 
+          a.name.localeCompare(b.name)
+        );
+      });
+
+    return sortedGroups;
   }, [items]);
 
   if (isLoading) {
