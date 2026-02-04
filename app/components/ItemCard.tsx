@@ -58,7 +58,7 @@ export default function ItemCard(props: Readonly<Props>) {
               <img src={image_url} alt={name} className="w-full h-full object-cover transition-transform hover:scale-105" />
             </div>
           )}
-          <h3 className="mx-2 font-semibold text-gray-900">{name}</h3>
+          <h3 className="mx-2 mt-1 font-semibold text-gray-900">{name}</h3>
           <h3 className="mx-2 mb-2 text-xs text-gray-600">{description}</h3>
         </div>
         
