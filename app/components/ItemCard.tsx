@@ -42,7 +42,7 @@ export default function ItemCard(props: Readonly<Props>) {
           isSelected ? "border-blue-500 bg-blue-50/50" : "border-gray-200 bg-white"
         }`}
       >
-        <div className="absolute top-2 right-2 z-10">
+        <div className="absolute top-2 left-3 z-10">
           <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.className} shadow-xs`}>
             {badge.label}
           </span>
@@ -58,7 +58,7 @@ export default function ItemCard(props: Readonly<Props>) {
               <img src={image_url} alt={name} className="w-full h-full object-cover transition-transform hover:scale-105" />
             </div>
           )}
-          <h3 className="mx-2 mt-1 pr-24 font-semibold text-gray-900">{name}</h3>
+          <h3 className={`${image_url ? '' : 'pt-8'} text-sm mx-2 my-1 font-semibold text-gray-900`}>{name}</h3>
           <h3 className="mx-2 mb-2 text-xs text-gray-600">{description}</h3>
         </div>
         

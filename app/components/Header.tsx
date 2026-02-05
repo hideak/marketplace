@@ -33,7 +33,7 @@ export default function Header(props: Readonly<Props>) {
           <button
             onClick={onCheckout}
             disabled={selectedCount === 0}
-            className={`px-5 py-2.5 rounded-full font-semibold text-sm transition-all transform active:scale-95 ${
+            className={`px-5 py-2.5 rounded-full font-semibold text-xs transition-all transform active:scale-95 ${
               selectedCount > 0
                 ? "bg-gray-900 text-white shadow-lg hover:bg-gray-800 hover:shadow-xl"
                 : "bg-gray-100 text-gray-400 cursor-not-allowed"
