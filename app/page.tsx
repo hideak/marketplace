@@ -1,18 +1,25 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import ItemCard from "./components/ItemCard";
+import { useState, useMemo, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import ItemCard, { StateBadges } from "./components/ItemCard";
 import Header from "./components/Header";
 import ItemForm from "./components/ItemForm";
 import { Item } from "./models/Item";
+import { ItemState } from "./models/ItemState";
 import { itemService } from "@/lib/itemService";
 
 import LoadingSpinner from "./components/LoadingSpinner";
 
-export default function Home() {
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const isAdmin = searchParams.has("admin");
+  
   const [selectedProductIds, setSelectedProductIds] = useState<Set<number>>(new Set());
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStates, setFilterStates] = useState<Set<ItemState>>(new Set());
   
   // CRUD State
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -120,8 +127,19 @@ export default function Home() {
   const productsByCategory = useMemo(() => {
     const groups: Record<string, Item[]> = {};
     
+    // Filter items
+    const filteredItems = items.filter((item) => {
+      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesState = filterStates.size === 0 || filterStates.has(item.state);
+      
+      // Hide Pending or ToMove for non-admin
+      const isVisible = isAdmin || (item.state !== ItemState.Pending && item.state !== ItemState.ToMove);
+      
+      return matchesSearch && matchesState && isVisible;
+    });
+
     // Create groups
-    items.forEach((product) => {
+    filteredItems.forEach((product) => {
       if (!groups[product.category]) {
         groups[product.category] = [];
       }
@@ -139,7 +157,7 @@ export default function Home() {
       });
 
     return sortedGroups;
-  }, [items]);
+  }, [items, searchTerm, filterStates, isAdmin]);
 
   if (isLoading) {
     return (
@@ -149,42 +167,110 @@ export default function Home() {
     );
   }
 
+  const toggleFilterState = (state: ItemState) => {
+    setFilterStates((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(state)) {
+        newSet.delete(state);
+      } else {
+        newSet.add(state);
+      }
+      return newSet;
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <Header 
         selectedCount={selectedProductIds.size} 
         onCheckout={handleCheckout} 
         onAdd={handleAdd}
+        isAdmin={isAdmin}
       />
 
       <main className="container mx-auto px-4 pt-4">
         <div className="mb-6">
-          <div className="text-gray-900 mb-2">Olá, visitante! 🙃</div>
-          <div className="text-sm text-gray-600">Estou vendendo alguns itens. Se você gostar de algo, selecione o item e chame no WhatsApp!</div>
+          <div className="text-gray-900 mb-2 font-medium">Olá, visitante! 🙃</div>
+          <div className="text-sm text-gray-600 mb-6">Estou vendendo alguns itens. Se você gostar de algo, selecione o item e chame no WhatsApp!</div>
+
+          <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div>
+              <label htmlFor="search" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Buscar por nome</label>
+              <input
+                id="search"
+                type="text"
+                placeholder="Ex: Teclado, Cadeira..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-800 placeholder:text-gray-400"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Filtrar por Estado</label>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setFilterStates(new Set())}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    filterStates.size === 0
+                      ? "bg-gray-900 text-white shadow-sm"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  Todos
+                </button>
+                {Object.entries(StateBadges).map(([key, { label }]) => {
+                  const state = key as ItemState;
+                  const isActive = filterStates.has(state);
+                  return (
+                    <button
+                      key={state}
+                      onClick={() => toggleFilterState(state)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                        isActive
+                          ? "bg-blue-600 text-white shadow-sm ring-2 ring-blue-100"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-16">
-          {Object.entries(productsByCategory).map(([category, products]) => (
-            <section key={category}>
-              <div className="sticky top-14 bg-gray-50 z-30 py-4 mb-2">
-                <h3 className="text-2xl font-semibold text-gray-800 pl-2 border-l-4 border-blue-500">
-                  {category}
-                </h3>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-                {products.map((product) => (
-                  <ItemCard
-                    key={product.id}
-                    {...product}
-                    isSelected={selectedProductIds.has(product.id)}
-                    onToggleSelect={handleToggleSelect}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
+          {Object.keys(productsByCategory).length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-4xl mb-4 text-gray-300">🔍</div>
+              <h3 className="text-xl font-medium text-gray-600">Nenhum item encontrado</h3>
+              <p className="text-gray-400">Tente ajustar sua busca ou filtros.</p>
+            </div>
+          ) : (
+            Object.entries(productsByCategory).map(([category, products]) => (
+              <section key={category}>
+                <div className="sticky top-14 bg-gray-50 z-30 py-4 mb-2">
+                  <h3 className="text-2xl font-semibold text-gray-800 pl-2 border-l-4 border-blue-500">
+                    {category}
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+                  {products.map((product) => (
+                    <ItemCard
+                      key={product.id}
+                      {...product}
+                      isSelected={selectedProductIds.has(product.id)}
+                      onToggleSelect={handleToggleSelect}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      isAdmin={isAdmin}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))
+          )}
         </div>
       </main>
 
@@ -199,12 +285,26 @@ export default function Home() {
         </div>
       )}
 
-      <ItemForm 
-        isOpen={isFormOpen} 
-        onClose={() => setIsFormOpen(false)} 
-        onSave={handleSave} 
-        initialItem={editingItem} 
-      />
+      {isAdmin && (
+        <ItemForm 
+          isOpen={isFormOpen} 
+          onClose={() => setIsFormOpen(false)} 
+          onSave={handleSave} 
+          initialItem={editingItem} 
+        />
+      )}
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
   );
 }

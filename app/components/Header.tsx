@@ -4,10 +4,11 @@ interface Props {
   selectedCount: number;
   onCheckout: () => void;
   onAdd: () => void;
+  isAdmin?: boolean;
 }
 
 export default function Header(props: Readonly<Props>) {
-  const { selectedCount, onCheckout, onAdd } = props;
+  const { selectedCount, onCheckout, onAdd, isAdmin = false } = props;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/80 backdrop-blur-md">
@@ -22,13 +23,15 @@ export default function Header(props: Readonly<Props>) {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={onAdd}
-            className="p-2.5 rounded-full text-gray-600 hover:bg-gray-100 transition-colors"
-            title="Adicionar Item"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
+          {isAdmin && (
+            <button
+              onClick={onAdd}
+              className="p-2.5 rounded-full text-gray-600 hover:bg-gray-100 transition-colors"
+              title="Adicionar Item"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          )}
           
           <button
             onClick={onCheckout}

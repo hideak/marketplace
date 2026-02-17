@@ -1,4 +1,4 @@
-import { Check, ShoppingBag, Pencil, Trash2 } from "lucide-react";
+import { Check, Pencil, Trash2 } from "lucide-react";
 import { ItemState } from "../models/ItemState";
 import { useState } from "react";
 import ImageModal from "./ImageModal";
@@ -14,6 +14,7 @@ interface Props {
   onToggleSelect: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
+  isAdmin?: boolean;
 }
 
 export const StateBadges: Record<ItemState, { label: string; className: string }> = {
@@ -25,7 +26,7 @@ export const StateBadges: Record<ItemState, { label: string; className: string }
 };
 
 export default function ItemCard(props: Readonly<Props>) {
-  const { id, name, description, price, state, image_url, isSelected, onToggleSelect, onEdit, onDelete } = props;
+  const { id, name, description, price, state, image_url, isSelected, onToggleSelect, onEdit, onDelete, isAdmin = false } = props;
   const badge = StateBadges[state];
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -86,22 +87,24 @@ export default function ItemCard(props: Readonly<Props>) {
             )}
           </button>
 
-          <div className="grid grid-cols-2 gap-1">
-            <button
-              onClick={handleDelete}
-              className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 rounded-md transition-colors"
-            >
-              <Trash2 className="w-3.5 h-3.5 hidden sm:block" />
-              Excluir
-            </button>
-            <button
-              onClick={() => onEdit(id)}
-              className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-md transition-colors"
-            >
-              <Pencil className="w-3.5 h-3.5 hidden sm:block" />
-              Editar
-            </button>
-          </div>
+          {isAdmin && (
+            <div className="grid grid-cols-2 gap-1">
+              <button
+                onClick={handleDelete}
+                className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 rounded-md transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5 hidden sm:block" />
+                Excluir
+              </button>
+              <button
+                onClick={() => onEdit(id)}
+                className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-md transition-colors"
+              >
+                <Pencil className="w-3.5 h-3.5 hidden sm:block" />
+                Editar
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
