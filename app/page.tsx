@@ -132,8 +132,12 @@ function HomeContent() {
       const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesState = filterStates.size === 0 || filterStates.has(item.state);
       
-      // Hide Pending or ToMove for non-admin
-      const isVisible = isAdmin || (item.state !== ItemState.Pending && item.state !== ItemState.ToMove);
+      // Hide Pending, ToMove or Sold for non-admin
+      const isVisible = isAdmin || (
+        item.state !== ItemState.Pending && 
+        item.state !== ItemState.ToMove && 
+        item.state !== ItemState.Sold
+      );
       
       return matchesSearch && matchesState && isVisible;
     });
@@ -218,23 +222,29 @@ function HomeContent() {
                 >
                   Todos
                 </button>
-                {Object.entries(StateBadges).map(([key, { label }]) => {
-                  const state = key as ItemState;
-                  const isActive = filterStates.has(state);
-                  return (
-                    <button
-                      key={state}
-                      onClick={() => toggleFilterState(state)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                        isActive
-                          ? "bg-blue-600 text-white shadow-sm ring-2 ring-blue-100"
-                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
+                {Object.entries(StateBadges)
+                  .filter(([key]) => isAdmin || (
+                    key !== ItemState.Pending && 
+                    key !== ItemState.ToMove && 
+                    key !== ItemState.Sold
+                  ))
+                  .map(([key, { label }]) => {
+                    const state = key as ItemState;
+                    const isActive = filterStates.has(state);
+                    return (
+                      <button
+                        key={state}
+                        onClick={() => toggleFilterState(state)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                          isActive
+                            ? "bg-blue-600 text-white shadow-sm ring-2 ring-blue-100"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
               </div>
             </div>
           </div>
