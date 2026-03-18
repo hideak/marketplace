@@ -132,11 +132,10 @@ function HomeContent() {
       const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesState = filterStates.size === 0 || filterStates.has(item.state);
       
-      // Hide Pending, ToMove or Sold for non-admin
+      // Hide Pending and ToMove for non-admin
       const isVisible = isAdmin || (
         item.state !== ItemState.Pending && 
-        item.state !== ItemState.ToMove && 
-        item.state !== ItemState.Sold
+        item.state !== ItemState.ToMove
       );
       
       return matchesSearch && matchesState && isVisible;
@@ -225,8 +224,7 @@ function HomeContent() {
                 {Object.entries(StateBadges)
                   .filter(([key]) => isAdmin || (
                     key !== ItemState.Pending && 
-                    key !== ItemState.ToMove && 
-                    key !== ItemState.Sold
+                    key !== ItemState.ToMove
                   ))
                   .map(([key, { label }]) => {
                     const state = key as ItemState;
