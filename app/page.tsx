@@ -129,7 +129,10 @@ function HomeContent() {
     
     // Filter items
     const filteredItems = items.filter((item) => {
-      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const lowerSearch = searchTerm.toLowerCase();
+      const matchesSearch = 
+        item.name.toLowerCase().includes(lowerSearch) || 
+        item.description.toLowerCase().includes(lowerSearch);
       const matchesState = filterStates.size === 0 || filterStates.has(item.state);
       
       // Hide Pending and ToMove for non-admin
@@ -198,11 +201,11 @@ function HomeContent() {
 
           <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div>
-              <label htmlFor="search" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Buscar por nome</label>
+              <label htmlFor="search" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Buscar por nome ou descrição</label>
               <input
                 id="search"
                 type="text"
-                placeholder="Ex: Teclado, Cadeira..."
+                placeholder="Ex: Teclado, Cadeira, Seminovo..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-800 placeholder:text-gray-400"
