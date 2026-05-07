@@ -4,5 +4,6 @@ export enum ItemState {
   ToDonate = "ToDonate",
   ToMove = "ToMove",
   ToTrash = "ToTrash",
-  Sold = "Sold"
+  Sold = "Sold",
+  Delivered = "Delivered"
 }

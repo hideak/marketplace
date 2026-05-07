@@ -24,6 +24,7 @@ export const StateBadges: Record<ItemState, { label: string; className: string }
   [ItemState.ToMove]: { label: "📦 Mudança", className: "bg-blue-100 text-blue-800" },
   [ItemState.ToTrash]: { label: "♻️ Descarte", className: "bg-red-100 text-red-800" },
   [ItemState.Sold]: { label: "🤝 Vendido", className: "bg-gray-100 text-gray-800" },
+  [ItemState.Delivered]: { label: "🚚 Entregue", className: "bg-teal-100 text-teal-800" },
 };
 
 export default function ItemCard(props: Readonly<Props>) {
@@ -72,18 +73,13 @@ export default function ItemCard(props: Readonly<Props>) {
           )}
           <button
             onClick={() => onToggleSelect(id)}
-            disabled={state === ItemState.Sold}
             className={`w-full px-4 py-2 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-colors ${
-              state === ItemState.Sold
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : isSelected
+              isSelected
                 ? "bg-blue-600 text-white hover:bg-blue-700"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
-            {state === ItemState.Sold ? (
-              "Item Vendido"
-            ) : isSelected ? (
+            {isSelected ? (
               <>
                 <Check className="w-4 h-4" />
                 Selecionado
